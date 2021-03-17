@@ -1,4 +1,4 @@
-// wrk.js v1.2.0
+// wrk.js v1.3.0
 // Protected under GNU General Public License v3.0
 
 // Setup wrk instance
@@ -11,7 +11,7 @@ if (window.wrk !== undefined) {
 }
 else {
     var wrk = {}; // Create an object to be the basis of wrk
-    wrk.VERSION = 'v1.2.0';
+    wrk.VERSION = 'v1.3.0';
     wrk.consoleLogHeader = '  🔧🔧 ';
     wrk.consoleLogStyling = 'background-color: #9cc8ff; display: block';
     window.wrk = wrk; // Make it global
@@ -148,6 +148,20 @@ wrk.str.mult = function(str, amount) {
         result += str;
     }
     return result;
+}
+
+wrk.str.replaceAll = function(str, pattern, replacement='') {
+    // If string.replaceAll is supported, use it
+    if (typeof str.replaceAll == 'function') {
+        return str.replaceAll(pattern, replacement);
+    }
+    // Else do it the lazy way
+    else {
+        while (str.includes(pattern)) {
+            str = str.replace(pattern, replacement);
+        }
+        return str;
+    }
 }
 
 wrk._180DIVPI = 180 / wrk.PI; // speeds up degrees -> radians and vice versa
@@ -376,6 +390,11 @@ wrk.obj.oneLevelCopy = function(obj) {
     return newObj;
 }
 
+// You'll notice that a lot of the functions in this file could use the other ones
+// But this carries a severe speed penalty, so I've put things inline if that speeds it up
+// Vector operations are often the slowest thing in an application,
+// so making them fast is critical
+
 wrk.v = function(x, y, z=0) {
     // simple and (hopefully) fast
     return {x : x, y : y, z : z};
@@ -409,8 +428,10 @@ wrk.v.add = function(v1, v2) {
 }
 
 wrk.v.copyAdd = function(v1, v2) {
-    var v3 = wrk.v.copy(v1);
-    wrk.v.add(v3, v2);
+    var v3 = wrk.v(
+        v1.x + v2.x,
+        v1.y + v2.y,
+        v1.z + v2.z);
     return v3;
 }
 
@@ -421,8 +442,10 @@ wrk.v.sub = function(v1, v2) {
 }
 
 wrk.v.copySub = function(v1, v2) {
-    var v3 = wrk.v.copy(v1);
-    wrk.v.sub(v3, v2);
+    var v3 = wrk.v(
+        v1.x / v2.x,
+        v1.y / v2.y,
+        v1.z / v2.z);
     return v3;
 }
 
@@ -433,8 +456,10 @@ wrk.v.mult = function(v, amount) {
 }
 
 wrk.v.copyMult = function(v, amount) {
-    var v2 = wrk.v.copy(v);
-    wrk.v.mult(v2, amount);
+    var v2 = wrk.v(
+        v.x * amount,
+        v.y * amount,
+        v.z * amount);
     return v2;
 }
 
@@ -445,8 +470,10 @@ wrk.v.div = function(v, amount) {
 }
 
 wrk.v.copyDiv = function(v, amount) {
-    var v2 = wrk.v.copy(v);
-    wrk.v.div(v2, amount);
+    var v2 = wrk.v(
+        v.x / amount,
+        v.y / amount,
+        v.z / amount);
     return v2;
 }
 
@@ -455,32 +482,44 @@ wrk.v.magSq = function(v) {
 }
 
 wrk.v.mag = function(v) {
-    return wrk.sqrt(wrk.v.magSq(v));
+    return wrk.sqrt(v.x ** 2 + v.y ** 2 + v.z ** 2);
 }
 
 wrk.v.distSq = function(v1, v2) {
-    var v3 = wrk.v.copySub(v2, v1);
-    return wrk.v.magSq(v3);
+    var displacementX = v2.x - v1.x;
+    var displacementY = v2.y - v1.y;
+    var displacementZ = v2.z - v1.z;
+    return displacementX ** 2 + displacementY ** 2 + displacementZ ** 2;
 }
 
 wrk.v.dist = function(v1, v2) {
-    return wrk.sqrt(wrk.v.distSq(v1, v2));
+    var displacementX = v2.x - v1.x;
+    var displacementY = v2.y - v1.y;
+    var displacementZ = v2.z - v1.z;
+    return wrk.sqrt(displacementX ** 2 + displacementY ** 2 + displacementZ ** 2);
 }
 
 wrk.v.mean = function(v1, v2) {
-    var displacement = wrk.v.copySub(v2, v1);
-    wrk.v.div(displacement, 2);
-    return wrk.v.copyAdd(v1, displacement);
+    var halfDisplacementX = (v2.x - v1.x) / 2;
+    var halfDisplacementY = (v2.y - v1.y) / 2;
+    var halfDisplacementZ = (v2.z - v1.z) / 2;
+
+    return wrk.v(
+        v1.x + halfDisplacementX,
+        v1.y + halfDisplacementY,
+        v1.z + halfDisplacementZ);
 }
 
 wrk.v.normalize = function(v) {
-    var mag = wrk.v.mag(v);
-    wrk.v.div(v, mag);
+    var mag = wrk.sqrt(v.x ** 2 + v.y ** 2 + v.z ** 2)
+    v.x /= mag;
+    v.y /= mag;
+    v.z /= mag;
 }
 
 wrk.v.rotate = function(v, angle=0, useDegrees=false) {
     if (useDegrees) {
-        angle = wrk.radians(angle);
+        angle /= wrk._180DIVPI;
     }
     
     var cos = wrk.cos(angle);
@@ -496,7 +535,7 @@ wrk.v.rotate = function(v, angle=0, useDegrees=false) {
 
 wrk.v.heading = function(v, useDegrees=false) {
     var heading = wrk.atan2(v.y, v.x);
-    if (useDegrees) heading = wrk.degrees(heading);
+    if (useDegrees) heading = heading * wrk._180DIVPI;
     return heading;
 }
 
@@ -1558,3 +1597,4 @@ wrk.GameEngine.CircleCollider = class extends wrk.GameEngine.BaseCollider {
         return (distSq < this.radius ** 2 + collider.radius ** 2);
     }
 }
+
