@@ -1,5 +1,5 @@
 class Boid extends wrk.GameEngine.DrawableEntity {
-    static texture = wrk.GameEngine.Texture.fromUrl('/boid.png');
+    static texture = wrk.GameEngine.Texture.fromUrl('boid.png');
 
     constructor(position, velocity, maxSpeed, size, behaviour, maxZDepth=0) {
         super('boid', position, 0, Boid.texture, size);
