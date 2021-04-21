@@ -1,14 +1,15 @@
-class Flock extends wrk.GameEngine.Scene {
-    constructor(size, boidHeightRange, speedRange, behaviour, is3d=false) {
+class Flock extends wrk.GameEngine.Entity {
+    constructor(size, boidHeightRange, speedRange, behaviour, is3d=false, boidColor=0xffffff) {
         // Behaviour is a dict with keys:
         // cohesionDist, cohesionStrength, alignmentDist, alignmentStrength,
         // avoidanceDist, avoidanceStrength
 
-        super('flock')
+        super('flock', wrk.v(0, 0), 0);
         this.size = size;
         this.boidHeightRange = boidHeightRange;
         this.speedRange = speedRange;
         this.behaviour = behaviour;
+        this.boidColor = boidColor;
         this.createBoids(is3d);
     }
 
@@ -32,6 +33,7 @@ class Flock extends wrk.GameEngine.Scene {
             wrk.v.rotate(vel, wrk.randint(0, 360), true);
 
             var boid = new Boid(position, vel, maxSpeed, size, this.behaviour, maxBoidPos.z);
+            boid.setTint(this.boidColor);
             this.addChild(boid);
         });
     }

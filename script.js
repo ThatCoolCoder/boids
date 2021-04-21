@@ -10,6 +10,9 @@ resizeCanvas();
 
 window.addEventListener('resize', resizeCanvas);
 
-var flock = new Flock(config.flockSize, config.heightRange, config.speedRange, config.behaviour, config.is3d)
+var flock = new Flock(config.flockSize, config.heightRange, config.speedRange, config.behaviour, config.is3d, config.boidColor);
 
-wrk.GameEngine.selectScene(flock);
+var scene = new wrk.GameEngine.Scene('scene');
+scene.addChild(flock);
+
+wrk.GameEngine.selectScene(scene);
