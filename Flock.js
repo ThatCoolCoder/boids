@@ -1,5 +1,5 @@
 class Flock extends wrk.GameEngine.Entity {
-    constructor(size, boidHeightRange, speedRange, behaviour, is3d=false, boidColor=0xffffff) {
+    constructor(size, boidHeightRange, boidAspectRatio, speedRange, behaviour, is3d=false, boidColor=0xffffff) {
         // Behaviour is a dict with keys:
         // cohesionDist, cohesionStrength, alignmentDist, alignmentStrength,
         // avoidanceDist, avoidanceStrength
@@ -7,6 +7,7 @@ class Flock extends wrk.GameEngine.Entity {
         super('flock', wrk.v(0, 0), 0);
         this.size = size;
         this.boidHeightRange = boidHeightRange;
+        this.boidAspectRatio = boidAspectRatio;
         this.speedRange = speedRange;
         this.behaviour = behaviour;
         this.boidColor = boidColor;
@@ -26,7 +27,7 @@ class Flock extends wrk.GameEngine.Entity {
 
         wrk.doNTimes(this.size, i => {
             var height = wrk.randint(this.boidHeightRange.min, this.boidHeightRange.max);
-            var size = wrk.v(height * 0.5, height);
+            var size = wrk.v(height * this.boidAspectRatio, height);
             var position = wrk.v.random(wrk.v(0, 0), maxBoidPos);
             var maxSpeed = wrk.randint(this.speedRange.min, this.speedRange.max);
             var vel = wrk.v(0, wrk.randint(0, maxSpeed));
