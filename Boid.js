@@ -142,10 +142,18 @@ class Boid extends wrk.GameEngine.DrawableEntity {
         }
     }
 
-    shrinkFor3dEffect() {
+    fake3dEffect() {
         if (this.maxZDepth != 0) {
             var distanceFromFromFront = (this.localPosition.z / this.maxZDepth) / 2 + 0.5;
-            this.setTextureSize(wrk.v.copyMult(this.trueSize, distanceFromFromFront));
+
+            var squishFactorVector = wrk.v(this.velocity.z,
+                wrk.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2));
+            var squishFactor = wrk.abs(wrk.v.heading(squishFactorVector)) / (wrk.PI / 2);
+            squishFactor = wrk.max(0.1, squishFactor); // restrict maximum squishing
+
+            var textureSize = wrk.v.copyMult(this.trueSize, distanceFromFromFront); // make smaller ones further
+            textureSize.y *= squishFactor; // make turning ones look short
+            this.setTextureSize(textureSize);
         }
     }
 
@@ -168,6 +176,6 @@ class Boid extends wrk.GameEngine.DrawableEntity {
 
         this.pointInTravelDirection();
 
-        this.shrinkFor3dEffect();
+        this.fake3dEffect();
     }
 }
