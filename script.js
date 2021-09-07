@@ -1,4 +1,4 @@
-document.body.style.backgroundColor = '#' + config.bgColor.toString(16);
+document.body.style.backgroundColor = '#' + ('00000' + config.bgColor.toString(16)).slice(-6);
 
 function resizeCanvas() {
     var size = wrk.v(wrk.dom.viewportWidth() * config.windowProportionTaken.x,

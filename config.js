@@ -1,5 +1,5 @@
 const config = {
-    bgColor : 0x222244,
+    bgColor : 0x000000,
     windowProportionTaken : wrk.v(0.98, 0.98),
     is3d : false,
 
