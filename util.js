@@ -1,20 +1,3 @@
-function getViewportWidth() {
-    return Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-}
-
-function getViewportHeight() { 
-    return Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-}
-
-function randflt(min, max) {
-    var diff = max - min;
-    return Math.random() * diff + min;
-}
-
-function randint(min, max) {
-    return Math.floor(randflt(min, max));
-}
-
 function darkenColorChannel(dataArray) {
     var darkenChannel = dataArray[0];
     var colorLimits = dataArray[1];
